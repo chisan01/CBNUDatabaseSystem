@@ -1,30 +1,50 @@
 import java.sql.DriverManager
 
 fun main(args: Array<String>) {
-//    val allBook = getAllBook()
-//    allBook.forEach(::println)
-//
-//    addBook(Book(
-//        bookId = allBook.last().bookId + 1,
-//        bookName = "test",
-//        publisher = "chisan",
-//        price = 10000
-//    ))
-//
-//    println("-------- delete last Book ------------")
-//    deleteBook(allBook.last().bookId)
-
-    getAllBook().forEach(::println)
-
-    println("--------- '축구의 역사' 검색 ----------")
-    val searchResult = searchBookByBookName("축구의 역사")
-    if(searchResult == null) println("존재하지 않는 도서입니다")
-    else println(searchResult)
-
-    println("--------- '축구의 역사2' 검색 ----------")
-    val searchResult2 = searchBookByBookName("축구의 역사2")
-    if(searchResult2 == null) println("존재하지 않는 도서입니다")
-    else println(searchResult2)
+    println("---------- 책 관리 프로그램 -----------")
+    while (true) {
+        println("1) 모든 책 목록 보기")
+        println("2) 제목으로 책 검색하기")
+        println("3) 책 추가하기")
+        println("4) 책 삭제하기")
+        println("5) 프로그램 종료")
+        print("(1) ~ (5) 중 원하는 메뉴를 선택하세요: ")
+        val menu = readLine()?.toInt()
+        when (menu) {
+            1 -> {
+                getAllBook().forEach(::println)
+            }
+            2 -> {
+                print("검색하려는 책 제목을 입력하세요: ")
+                val bookName = readLine() ?: ""
+                val searchResult = searchBookByBookName(bookName)
+                if (searchResult == null) println("존재하지 않는 도서입니다")
+                else println(searchResult)
+            }
+            3 -> {
+                println("추가하려는 책의 정보를 입력해주세요")
+                print("bookId: ")
+                val bookId = readLine()?.toInt() ?: -1
+                print("bookName: ")
+                val bookName = readLine()
+                print("publisher: ")
+                val publisher = readLine()
+                print("price: ")
+                val price = readLine()?.toInt()
+                addBook(Book(bookId, bookName, publisher, price))
+            }
+            4 -> {
+                print("삭제하려는 책의 bookId를 입력하세요: ")
+                val bookId = readLine()?.toInt() ?: -1
+                deleteBook(bookId)
+            }
+            5 -> return
+            else -> {
+                println("올바른 메뉴를 입력해주세요")
+            }
+        }
+        println()
+    }
 }
 
 fun getAllBook(): List<Book> {
@@ -38,12 +58,14 @@ fun getAllBook(): List<Book> {
         val stmt = con.createStatement()
         val rs = stmt.executeQuery("SELECT * FROM Book ORDER BY bookid")
         while (rs.next()) {
-            result.add(Book(
-                bookId = rs.getInt(1),
-                bookName = rs.getString(2),
-                publisher = rs.getString(3),
-                price = rs.getInt(4)
-            ))
+            result.add(
+                Book(
+                    bookId = rs.getInt(1),
+                    bookName = rs.getString(2),
+                    publisher = rs.getString(3),
+                    price = rs.getInt(4)
+                )
+            )
         }
         con.close()
     } catch (e: Exception) {
@@ -71,6 +93,7 @@ fun addBook(book: Book) {
         e.printStackTrace()
     }
 }
+
 fun deleteBook(bookId: Int) {
     try {
         Class.forName("com.mysql.cj.jdbc.Driver")
@@ -98,7 +121,7 @@ fun searchBookByBookName(bookName: String): Book? {
         val pstmt = con.prepareStatement("SELECT * FROM Book WHERE bookname=?")
         pstmt.setString(1, bookName)
         val rs = pstmt.executeQuery()
-        if(rs.next()) searchResult = Book(
+        if (rs.next()) searchResult = Book(
             bookId = rs.getInt(1),
             bookName = rs.getString(2),
             publisher = rs.getString(3),
