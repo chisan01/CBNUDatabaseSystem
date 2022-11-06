@@ -4,12 +4,15 @@ fun main(args: Array<String>) {
     val allBook = getAllBook()
     allBook.forEach(::println)
 
-    addBook(Book(
-        bookId = allBook.last().bookId + 1,
-        bookName = "test",
-        publisher = "chisan",
-        price = 10000
-    ))
+//    addBook(Book(
+//        bookId = allBook.last().bookId + 1,
+//        bookName = "test",
+//        publisher = "chisan",
+//        price = 10000
+//    ))
+
+    println("-------- delete last Book ------------")
+    deleteBook(allBook.last().bookId)
 
     getAllBook().forEach(::println)
 }
@@ -52,6 +55,21 @@ fun addBook(book: Book) {
         pstmt.setString(3, book.publisher)
         book.price?.let { pstmt.setInt(4, it) }
 
+        pstmt.executeUpdate()
+        con.close()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+fun deleteBook(bookId: Int) {
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver")
+        val con = DriverManager.getConnection(
+            "jdbc:mysql://192.168.55.189:4567/madang",
+            "chisanahn", "1234"
+        )
+        val pstmt = con.prepareStatement("DELETE FROM Book where bookid=?")
+        pstmt.setInt(1, bookId)
         pstmt.executeUpdate()
         con.close()
     } catch (e: Exception) {
